@@ -87,7 +87,7 @@ function startFeature(feature: Feature) {
 
 	const process = Deno.run({
 		cmd: args,
-		cwd: "./features/" + feature.name,
+		cwd: "features/" + feature.name,
 	});
 
 	processes.set(feature.name, process);
@@ -176,4 +176,4 @@ app.addEventListener("listen", ({ hostname, port, secure }) => {
 	console.log(`Listening on: ${secure ? "https://" : "http://"}${hostname ?? "localhost"}:${port}`);
 });
 
-app.listen({ port: 80 });
+app.listen({ port: 800 });

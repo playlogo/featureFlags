@@ -27,12 +27,12 @@ sudo setcap CAP_NET_BIND_SERVICE=+eip ~/.deno/bin/deno
 Create system service:
 
 ```bash
-nano $HOME/.config/systemd/user/featureFlag.service
+nano $HOME/.config/systemd/user/featureFlags.service
 ```
 
 ```bash
 [Unit]  
-Description=FeatureFlag  
+Description=featureFlags
 After=network.target  
 After=tailscaled.service  
 StartLimitIntervalSec=0  
@@ -41,8 +41,8 @@ StartLimitIntervalSec=0
 Type=simple  
 Restart=always  
 RestartSec=3  
-WorkingDirectory=~/featureFlag
-ExecStart=~/.deno/bin/deno run --allow-read --allow-write --allow-run --allow-net server/main.ts 
+WorkingDirectory=/home/pi/featureFlags
+ExecStart=/home/pi/.deno/bin/deno run --allow-read --allow-write --allow-run --allow-net server/main.ts 
   
 [Install]  
 WantedBy=default.target
@@ -50,6 +50,13 @@ WantedBy=default.target
 
 ```bash
 systemctl --user daemon-reload
-systemctl --user enable FeatureFlag
-systemctl --user start FeatureFlag
+systemctl --user enable featureFlags
+systemctl --user start featureFlags
+systemctl --user status featureFlags
+```
+
+View logs:
+
+```bash
+journalctl --user -u featureFlags -e -f
 ```
