@@ -176,4 +176,4 @@ app.addEventListener("listen", ({ hostname, port, secure }) => {
 	console.log(`Listening on: ${secure ? "https://" : "http://"}${hostname ?? "localhost"}:${port}`);
 });
 
-app.listen({ port: 800 });
+app.listen({ port: 80 });
