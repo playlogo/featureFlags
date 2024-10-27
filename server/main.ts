@@ -87,7 +87,7 @@ function startFeature(feature: Feature) {
 
 	const process = Deno.run({
 		cmd: args,
-		cwd: "features/" + feature.name,
+		cwd: "./features/" + feature.name,
 	});
 
 	processes.set(feature.name, process);
