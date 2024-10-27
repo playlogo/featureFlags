@@ -1,0 +1,24 @@
+{
+    "name": "shairport",
+    "type": "process",
+    "executable": [
+        "deno",
+        "run",
+        "--allow-net",
+        "--allow-run",
+        "main.ts"
+    ],
+    "flags": [],
+    "config": {
+        "inline": [
+            {
+                "name": "allowedDevices",
+                "param": "--allowed-clients",
+                "type": "array",
+                "description": "Comma seperated list of macs for allowed devices",
+                "default": []
+            }
+        ],
+        "file": "config.json"
+    }
+}

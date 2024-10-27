@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+		<title>Feature Flags</title>
+
+		<script defer src="alpine.js"></script>
+		<style>
+			li {
+				margin: 10px 0;
+			}
+		</style>
+	</head>
+
+	<body>
+		<h2>Feature Flags - Overview</h2>
+
+		<main x-data x-init="init">
+			<template x-for="item in $store.features.features" :key="index">
+				<div>
+					<hr />
+					<!-- Name -->
+					<h3 x-text="item.name"></h3>
+
+					<!-- Enabled -->
+					<label for="checkbox" x-text="'Enabled: ' +  item.enabled">Enabled: </label>
+
+					<input type="checkbox" id="checkbox" x-model="item.enabled" />
+
+					<!-- Params -->
+					<template x-if="item.params.length !== 0">
+						<div>
+							<h4>Params</h4>
+							<ul>
+								<template x-for="param in item.params" :key="index">
+									<li>
+										<label x-text="param.name" x-bind:title="param.description"></label>
+										<span>:</span>
+
+										<!--Array-->
+										<template x-if="param.type === 'string'">
+											<input type="text" x-model="param.value" />
+										</template>
+
+										<!--Boolean-->
+										<template x-if="param.type === 'boolean'">
+											<input type="checkbox" x-model="param.value" />
+										</template>
+
+										<!-- Number -->
+										<template x-if="param.type === 'number'">
+											<input type="number" x-model="param.value" />
+										</template>
+
+										<!--Array-->
+										<template x-if="param.type === 'array'">
+											<ul>
+												<template x-for="value in param.value" :key="index">
+													<li>
+														<input type="text" x-model="value" />
+														<button
+															x-on:click="param.value = param.value.filter((entry) => entry !== value)"
+														>
+															-
+														</button>
+													</li>
+												</template>
+												<li>
+													<input
+														type="text"
+														placeholder="Add"
+														x-bind:id="'array_' + item.name + '_' + param.name"
+													/>
+													<button
+														x-on:click=" () => {
+                                                            const ele = document.getElementById('array_' + item.name + '_' + param.name);
+                                                            param.value = [...param.value, ele.value]; 
+                                                            ele.value = '';
+                                                    }"
+													>
+														+
+													</button>
+												</li>
+											</ul>
+										</template>
+									</li>
+								</template>
+							</ul>
+						</div>
+					</template>
+
+					<!--Save-->
+					<button x-on:click="saveFeature(item)">Save</button>
+				</div>
+			</template>
+		</main>
+	</body>
+
+	<script>
+		const host = "";
+
+		function init() {
+			Alpine.store("features", {
+				features: [],
+
+				update(newState) {
+					this.features = newState;
+				},
+			});
+		}
+
+		// Load features
+		async function loadFeatures() {
+			const response = await fetch(host + "/features");
+			const data = await response.json();
+			Alpine.store("features").update(data);
+		}
+
+		// Save features
+		async function saveFeature(featureDict) {
+			const content = JSON.parse(JSON.stringify(featureDict));
+
+			const response = await fetch(host + "/features", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify(content),
+			});
+			const data = await response.json();
+
+			if (data.error) {
+				alert(data.error);
+			} else {
+				loadFeatures();
+			}
+		}
+
+		document.onload = loadFeatures();
+	</script>
+</html>
