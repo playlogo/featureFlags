@@ -1,8 +1,8 @@
 {
     "name": "shairport",
     "type": "process",
-    "executable": [
-        "/home/pi/.deno/bin/deno",
+    "executable": "deno",
+    "args": [
         "run",
         "--allow-net",
         "--allow-run",

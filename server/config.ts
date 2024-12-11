@@ -28,3 +28,26 @@ class LocalConfig {
 }
 
 export const LOCAL_CONFIG = new LocalConfig();
+
+class ConfigManager {
+	featuresConfig: { [key: string]: LocalConfigFeature } = {};
+	generalConfig: { [key: string]: LocalConfigFeature } = {};
+
+	async load() {
+		try {
+			this.featuresConfig = JSON.parse(await Deno.readTextFile("configs/features.json"));
+		} catch (error) {
+			console.error("[featuresConfig] Error parsing params");
+
+			await this.save();
+
+			console.log("Created new config file");
+		}
+	}
+
+	async save(config: typeof this.featuresConfig) {
+		await Deno.writeTextFile("configs/config.json", JSON.stringify(config));
+	}
+}
+
+export default ConfigManager;

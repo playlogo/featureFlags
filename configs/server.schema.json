@@ -1,0 +1,20 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Server Default Config Schema",
+    "type": "object",
+    "properties": {
+        "executables": {
+            "description": "Map of nichnames to executable paths",
+            "type": "object",
+            "properties": {},
+            "required": [],
+            "additionalProperties": {
+                "type": "string",
+                "description": "Path to the executable"
+            }
+        }
+    },
+    "required": [
+        "executables"
+    ]
+}

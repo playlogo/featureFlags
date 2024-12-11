@@ -57,11 +57,12 @@
 										<!--Array-->
 										<template x-if="param.type === 'array'">
 											<ul>
-												<template x-for="value in param.value" :key="index">
+												<template x-for="(value, index) in param.value" :key="index">
 													<li>
 														<input type="text" x-model="value" />
+														<p x-model="value"></p>
 														<button
-															x-on:click="param.value = param.value.filter((entry) => entry !== value)"
+															x-on:click="param.value = [...param.value.slice(0, index), ...param.value.slice(index + 1)]"
 														>
 															-
 														</button>

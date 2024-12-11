@@ -42,7 +42,7 @@ Type=simple
 Restart=always  
 RestartSec=3  
 WorkingDirectory=/home/pi/featureFlags
-ExecStart=/home/pi/.deno/bin/deno run --allow-read --allow-write --allow-run --allow-net server/main.ts 
+ExecStart=/home/pi/.deno/bin/deno task run 
   
 [Install]  
 WantedBy=default.target
