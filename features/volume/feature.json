@@ -1,0 +1,20 @@
+{
+    "type": "process",
+    "executable": "deno",
+    "args": [
+        "main.ts"
+    ],
+    "websocket": true,
+    "expose": {
+        "inline": [
+            {
+                "name": "volume",
+                "param": "--volume",
+                "type": "number",
+                "description": "Initial volume, must be in range 0 - 100",
+                "default": 50,
+                "specific": "volume"
+            }
+        ]
+    }
+}

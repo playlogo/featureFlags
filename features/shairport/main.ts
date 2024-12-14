@@ -1,11 +1,27 @@
 import { Client } from "https://deno.land/x/mqtt@0.1.2/deno/mod.ts"; // Deno (ESM)
-import { parse } from "https://deno.land/std/flags/mod.ts"; // Deno (ESM)
+import { parse } from "https://deno.land/std@0.224.0/flags/mod.ts"; // Deno (ESM)
 
 // Parse args
 const args = parse(Deno.args);
-const allowedClients: string[] = args["allowedDevices"] ? args["allowedDevices"].split(",") : [];
+let allowedClients: string[] = args["allowedDevices"] ? args["allowedDevices"].split(",") : [];
+console.log("Initial allowed clients:", allowedClients);
 
-console.log("Allowed clients:", allowedClients);
+// Websocket connection
+const websocketURI = args["websocket"];
+const webSocket = new WebSocket(websocketURI);
+
+webSocket.addEventListener("open", (event) => {
+	console.log("[websocket] Successfully connected to server");
+});
+
+webSocket.addEventListener("error", (event) => {
+	console.error("[websocket] Error connecting to server: ", event);
+});
+
+webSocket.addEventListener("message", (event) => {
+	allowedClients = (event.data as string).split(",");
+	console.log("[websocket] Received new allowed clients: " + allowedClients);
+});
 
 // Start mqtt subscriber
 const client = new Client({ url: "mqtt://192.168.178.29:1883", username: "", password: "" }); // Deno and Node.js
@@ -28,10 +44,14 @@ client.on("message", async (topic: string, payload: Uint8Array) => {
 
 	console.log("Client not allowed to connect: " + decoder.decode(payload));
 
+	webSocket.send(
+		JSON.stringify({ type: "report", field: "forbiddenConnection", value: decoder.decode(payload) })
+	);
+
 	// Else restart Shairport-sync
-	const p = Deno.run({
-		cmd: ["sudo", "/bin/systemctl", "restart", "shairport-sync"],
+	const command = new Deno.Command("sudo", {
+		args: ["/bin/systemctl", "restart", "shairport-sync"],
 	});
-	await p.status();
-	p.close();
+	const child = command.spawn();
+	await child.output();
 });
