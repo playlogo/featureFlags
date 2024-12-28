@@ -7,9 +7,9 @@ const args = parseArgs(Deno.args, {
 	string: ["allowedDevices"],
 });
 
-let allowedClients: string[] = args.allowedDevices ? args.allowedDevices.split(",") : [];
+let allowedDevices: string[] = args.allowedDevices ? args.allowedDevices.split(",") : [];
 
-console.log("Initial allowed clients:", allowedClients);
+console.log("Initial allowed clients:", allowedDevices);
 
 // Create websocket
 import { buildWebSocket } from "local/features/utils/websocket.ts";
@@ -17,8 +17,9 @@ import { buildWebSocket } from "local/features/utils/websocket.ts";
 const websocket = buildWebSocket("shairport");
 
 websocket.addEventListener("message", (event) => {
-	allowedClients = (event.data as string).split(",");
-	console.log("[websocket] Received new allowed clients: " + allowedClients);
+	const data = JSON.parse(event.data as string);
+	allowedDevices = data.allowedDevices;
+	console.log("[shairport] [websocket] Received new allowed clients: " + allowedDevices);
 });
 
 // Start mqtt subscriber
@@ -36,7 +37,7 @@ client.on("message", async (topic: string, payload: Uint8Array) => {
 	console.log("New client connection: " + decoder.decode(payload));
 
 	// Check if device is allowed to connect
-	if (allowedClients.includes(decoder.decode(payload))) {
+	if (allowedDevices.includes(decoder.decode(payload))) {
 		return;
 	}
 

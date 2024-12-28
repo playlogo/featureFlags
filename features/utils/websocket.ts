@@ -8,7 +8,7 @@ export function buildWebSocket(prefix: string) {
 
 	// Websocket connection
 	const websocketURI = Deno.env.get("FEATURE_SERVER_WEBSOCKET_URI")!;
-	const webSocket = new WebSocket(websocketURI);
+	const webSocket = new WebSocket(`${websocketURI}/${prefix}`);
 
 	webSocket.addEventListener("open", (event) => {
 		console.log(`[${prefix}] [websocket] Successfully connected to server`);

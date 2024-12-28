@@ -4,6 +4,7 @@ import { configManager } from "./config.ts";
 import { dataStore } from "./dataStore.ts";
 
 import { FeatureConfig, Feature } from "local/types/feature.d.ts";
+import { websocketManager } from "local/server/websocket.ts";
 
 class FeatureManager {
 	features: Feature[] = [];
@@ -16,9 +17,6 @@ class FeatureManager {
 		for (const process of Object.values(this.processes) as Deno.ChildProcess[]) {
 			process.kill();
 		}
-
-		// Load config
-		await configManager.load();
 
 		// Load data store
 		await dataStore.load();
@@ -123,7 +121,7 @@ class FeatureManager {
 		const env: any = {};
 
 		if (feature.websocket) {
-			env["FEATURE_SERVER_WEBSOCKET_URI"] = "";
+			env["FEATURE_SERVER_WEBSOCKET_URI"] = `http://localhost:${configManager.port + 1}`;
 		}
 
 		// Create process
@@ -148,11 +146,6 @@ class FeatureManager {
 	}
 
 	async updateFeature(feature: Feature) {
-		// If running, kill process
-		const process = this.processes.get(feature.name);
-		process?.kill("SIGTERM");
-		this.processes.delete(feature.name);
-
 		// Store changes to disk
 		await dataStore.updateFeature(feature);
 
@@ -165,8 +158,49 @@ class FeatureManager {
 				param.value;
 		}
 
-		// Restart feature
-		this.startFeature(feature);
+		// Check if we need to kill or start feature
+		if (feature.enabled && !this.processes.has(feature.name)) {
+			// Start it!
+			await this.startFeature(feature);
+			return;
+		}
+
+		if (!feature.enabled && this.processes.has(feature.name)) {
+			// Kill it!
+			const process = this.processes.get(feature.name);
+			process?.kill("SIGTERM");
+			this.processes.delete(feature.name);
+
+			return;
+		}
+
+		// Update it via websocket or via a restart
+		if (feature.websocket && feature.enabled) {
+			const websocket = websocketManager.sockets[feature.name];
+
+			if (websocket === undefined) {
+				throw new Error("[features] Websocket not found for feature " + feature.name);
+			}
+
+			// Build message
+			const params: { [key: string]: any } = {};
+
+			for (const para of feature.params) {
+				params[para.name] = para.value;
+			}
+
+			await websocket.send(JSON.stringify(params));
+		} else if (!feature.websocket && feature.enabled) {
+			// If running, kill process
+			if (this.processes.has(feature.name)) {
+				const process = this.processes.get(feature.name);
+				process?.kill("SIGTERM");
+				this.processes.delete(feature.name);
+			}
+
+			// Restart feature
+			await this.startFeature(feature);
+		}
 	}
 }
 

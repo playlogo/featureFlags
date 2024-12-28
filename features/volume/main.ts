@@ -15,7 +15,10 @@ const websocket = buildWebSocket("volume");
 
 websocket.addEventListener("message", async (event) => {
 	// Set new volume
-	await setVolume(parseInt(event.data));
+	const data = JSON.parse(event.data as string);
+
+	console.log("[volume] [websocket] Received new volume: " + data.volume);
+	await setVolume(parseInt(data.volume));
 });
 
 // Utils

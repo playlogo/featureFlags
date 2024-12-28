@@ -1,6 +1,10 @@
 import { api } from "local/server/api.ts";
 import { featureManager } from "local/server/features.ts";
 import { websocketManager } from "local/server/websocket.ts";
+import { configManager } from "local/server/config.ts";
+
+console.log("[main] Loading config...");
+await configManager.load();
 
 console.log("[main] Starting websocket server...");
 await websocketManager.start();

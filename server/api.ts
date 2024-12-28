@@ -52,7 +52,9 @@ class API {
 
 		// Start server
 		this.app.addEventListener("listen", ({ hostname, port, secure }) => {
-			console.log(`Listening on: ${secure ? "https://" : "http://"}${hostname ?? "localhost"}:${port}`);
+			console.log(
+				`[api] Listening on: ${secure ? "https://" : "http://"}${hostname ?? "localhost"}:${port}`
+			);
 		});
 
 		await this.app.listen({ port: configManager.port });
