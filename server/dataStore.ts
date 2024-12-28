@@ -15,7 +15,7 @@ class DataStoreManager {
 
 	[prop: string]: any | DataStoreData["features"][string];
 
-	get(target: any, prop: string) {
+	get(_target: any, prop: string) {
 		if (this[prop] !== undefined) {
 			return this[prop];
 		}

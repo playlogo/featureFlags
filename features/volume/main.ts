@@ -29,7 +29,9 @@ async function setVolume(newVolume: number) {
 		});
 		const child = command.spawn();
 		await child.output();
-	} catch (_err) {}
+	} catch (_err) {
+		// Empty
+	}
 
 	try {
 		const command = new Deno.Command("amixer", {
@@ -37,5 +39,7 @@ async function setVolume(newVolume: number) {
 		});
 		const child = command.spawn();
 		await child.output();
-	} catch (_err) {}
+	} catch (_err) {
+		// Empty
+	}
 }

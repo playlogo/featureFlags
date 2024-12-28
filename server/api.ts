@@ -9,10 +9,10 @@ class API {
 		this.app = new Application();
 	}
 
-	async buildRouter() {
+	buildRouter() {
 		const router = new Router();
 
-		router.get("/features", async (ctx) => {
+		router.get("/features", (ctx) => {
 			ctx.response.body = featureManager.features;
 		});
 
@@ -24,6 +24,8 @@ class API {
 				await featureManager.updateFeature(body);
 				ctx.response.body = { success: true };
 			} catch (err) {
+				console.error(err);
+				console.error(body);
 				ctx.response.status = Status.ExpectationFailed;
 			}
 		});

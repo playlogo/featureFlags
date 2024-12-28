@@ -5,7 +5,7 @@ class WebSocketManger {
 	sockets: { [key: string]: WebSocket } = {};
 
 	async start() {
-		await new Promise<void>((resolve, reject) => {
+		await new Promise<void>((resolve, _reject) => {
 			this.server = Deno.serve(
 				{
 					port: configManager.port + 1,

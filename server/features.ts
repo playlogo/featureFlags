@@ -58,7 +58,7 @@ class FeatureManager {
 			}
 
 			// Create feature
-			let feature: Feature = {
+			const feature: Feature = {
 				name: featureName,
 				enabled: dataStore[featureName].enabled,
 				params: [],

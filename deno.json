@@ -2,8 +2,15 @@
     "tasks": {
         "dev": "deno run --watch --allow-read --allow-write --allow-run --allow-net server/main.ts",
         "run": "deno run --allow-read --allow-write --allow-run --allow-net server/main.ts",
-        "lint": "deno lint",
-        "check": "deno check src/main.ts src/**/*.ts --allow-import"
+        "lint": "deno lint --ignore=server/static",
+        "check": "deno check server/main.ts ./**/*.ts --allow-import"
     },
-    "importMap": "import_map.json"
+    "importMap": "import_map.json",
+    "lint": {
+        "rules": {
+            "exclude": [
+                "no-explicit-any"
+            ]
+        }
+    }
 }

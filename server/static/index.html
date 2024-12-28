@@ -59,7 +59,7 @@
 											<ul>
 												<template x-for="(value, index) in param.value" :key="index">
 													<li>
-														<input type="text" x-model="value" />
+														<input type="text" x-model="param.value[index]" />
 														<p x-model="value"></p>
 														<button
 															x-on:click="param.value = [...param.value.slice(0, index), ...param.value.slice(index + 1)]"
@@ -122,6 +122,7 @@
 		// Save features
 		async function saveFeature(featureDict) {
 			const content = JSON.parse(JSON.stringify(featureDict));
+			console.log(content);
 
 			const response = await fetch(host + "/features", {
 				method: "POST",

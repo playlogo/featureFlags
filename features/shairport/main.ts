@@ -33,7 +33,7 @@ await client.subscribe("aetherShairport/client_device_id");
 
 const decoder = new TextDecoder();
 
-client.on("message", async (topic: string, payload: Uint8Array) => {
+client.on("message", async (_topic: string, payload: Uint8Array) => {
 	console.log("New client connection: " + decoder.decode(payload));
 
 	// Check if device is allowed to connect
