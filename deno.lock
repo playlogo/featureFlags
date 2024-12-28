@@ -1,8 +1,18 @@
 {
   "version": "4",
   "specifiers": {
+    "jsr:@std/cli@*": "1.0.9",
+    "jsr:@std/dotenv@*": "0.225.3",
     "npm:@types/node@*": "22.5.4",
     "npm:path-to-regexp@6.2.1": "6.2.1"
+  },
+  "jsr": {
+    "@std/cli@1.0.9": {
+      "integrity": "557e5865af000efbf3f737dcfea5b8ab86453594f4a9cd8d08c9fa83d8e3f3bc"
+    },
+    "@std/dotenv@0.225.3": {
+      "integrity": "a95e5b812c27b0854c52acbae215856d9cce9d4bbf774d938c51d212711e8d4a"
+    }
   },
   "npm": {
     "@types/node@22.5.4": {

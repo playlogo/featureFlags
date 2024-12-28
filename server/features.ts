@@ -37,10 +37,21 @@ class FeatureManager {
 
 		// Load features
 		for await (const entry of Deno.readDir("./features")) {
+			// Check if valid feature
+			if (!entry.isDirectory) {
+				continue;
+			}
+
+			if (entry.name === "utils") {
+				continue;
+			}
+
+			// Load feature
 			const featureName = entry.name;
+
 			let featureConfig;
 
-			// Load config
+			// Read config
 			try {
 				featureConfig = JSON.parse(
 					Deno.readTextFileSync("./features/" + featureName + "/feature.json")

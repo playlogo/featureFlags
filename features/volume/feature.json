@@ -1,10 +1,14 @@
 {
+    "$schema": "../utils/feature.schema.json",
     "type": "process",
     "executable": "deno",
+    "websocket": true,
     "args": [
+        "run",
+        "--allow-net",
+        "--allow-run",
         "main.ts"
     ],
-    "websocket": true,
     "expose": {
         "inline": [
             {
