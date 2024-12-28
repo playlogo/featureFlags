@@ -1,53 +1,40 @@
-interface LocalConfigFeature {
-	enabled: boolean;
-	params: {
-		[key: string]: any;
-	};
-}
+import Ajv from "https://esm.sh/ajv@8.17.1";
 
-class LocalConfig {
-	load() {
-		let localConfig: { [key: string]: LocalConfigFeature } = {};
-
-		try {
-			localConfig = JSON.parse(Deno.readTextFileSync("./config.json"));
-		} catch (error) {
-			console.log("Error parsing params");
-
-			this.save(localConfig);
-
-			console.log("Created new config file");
-		}
-
-		return localConfig;
-	}
-
-	save(config: { [key: string]: LocalConfigFeature }) {
-		Deno.writeTextFileSync("./config.json", JSON.stringify(config));
-	}
-}
-
-export const LOCAL_CONFIG = new LocalConfig();
+import { ServerConfig } from "local/types/configs.d.ts";
 
 class ConfigManager {
-	featuresConfig: { [key: string]: LocalConfigFeature } = {};
-	generalConfig: { [key: string]: LocalConfigFeature } = {};
+	executables: ServerConfig["executables"] = {};
 
 	async load() {
+		let config: ServerConfig;
+
+		// Config validation
+		const ajv = new Ajv({ allErrors: true });
+		const configSchema = JSON.parse(await Deno.readTextFile("configs/server.schema.json"));
+		const validate = await ajv.compileAsync(configSchema);
+
+		// Try to load custom server config
 		try {
-			this.featuresConfig = JSON.parse(await Deno.readTextFile("configs/features.json"));
-		} catch (error) {
-			console.error("[featuresConfig] Error parsing params");
+			// Check if custom config exists
+			await Deno.stat("configs/server.json");
+			config = JSON.parse(await Deno.readTextFile("configs/server.json"));
 
-			await this.save();
+			// Validate config
+			if (!validate(config)) {
+				throw new Error(ajv.errorsText(validate.errors));
+			}
+		} catch (err) {
+			console.error("[config] Error loading custom config file");
+			console.error("[config] Falling back to default");
+			console.error(err);
 
-			console.log("Created new config file");
+			// Load default config file
+			config = JSON.parse(await Deno.readTextFile("configs/server.default.json"));
 		}
-	}
 
-	async save(config: typeof this.featuresConfig) {
-		await Deno.writeTextFile("configs/config.json", JSON.stringify(config));
+		// Store
+		this.executables = config.executables;
 	}
 }
 
-export default ConfigManager;
+export const configManager = new ConfigManager();

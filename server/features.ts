@@ -1,28 +1,13 @@
-import ConfigManager from "local/server/config.ts";
+import Ajv from "https://esm.sh/ajv@8.17.1";
 
-interface Feature {
-	name: string;
-	enabled: boolean;
-	params: {
-		name: string;
-		type: "array" | "string" | "boolean" | "number";
-		value: any;
-		description: string;
-		default?: any;
-	}[];
-	executable: string;
-	args: string[];
-}
+import { configManager } from "./config.ts";
+import { dataStore } from "./dataStore.ts";
+
+import { FeatureConfig, Feature } from "local/types/feature.d.ts";
 
 class FeatureManager {
 	features: Feature[] = [];
 	processes = new Map<string, Deno.ChildProcess>();
-
-	config: ConfigManager;
-
-	constructor() {
-		this.config = new ConfigManager();
-	}
 
 	async collect() {
 		// Reset everything
@@ -33,7 +18,15 @@ class FeatureManager {
 		}
 
 		// Load config
-		await this.config.load();
+		await configManager.load();
+
+		// Load data store
+		await dataStore.load();
+
+		// Build feature config validator
+		const ajv = new Ajv({ allErrors: true });
+		const featureSchema = JSON.parse(await Deno.readTextFile("features/utils/feature.schema.json"));
+		const validate = await ajv.compileAsync(featureSchema);
 
 		// Load features
 		for await (const entry of Deno.readDir("./features")) {
@@ -49,35 +42,39 @@ class FeatureManager {
 			// Load feature
 			const featureName = entry.name;
 
-			let featureConfig;
+			let featureConfig: FeatureConfig;
 
-			// Read config
+			// Verify and parse config
 			try {
 				featureConfig = JSON.parse(
 					Deno.readTextFileSync("./features/" + featureName + "/feature.json")
 				);
+
+				if (!validate(featureConfig)) {
+					throw new Error(ajv.errorsText(validate.errors));
+				}
 			} catch (error) {
 				console.log("[features] Error parsing config file for feature", featureName);
 				console.log(error);
 				continue;
 			}
 
-			// Construct feature
+			// Create feature
 			let feature: Feature = {
 				name: featureName,
-				enabled: this.config.features.checkEnabled(featureName),
+				enabled: dataStore[featureName].enabled,
 				params: [],
 				args: [],
-				executable: this.config.executables.resolveNickname(featureConfig.executable),
+				executable: configManager.executables[featureConfig.executable] ?? featureConfig.executable,
 			};
 
-			for (const configParam of featureConfig.config.inline) {
-				const localParam = this.config.features.getParam(featureName, configParam.name);
+			for (const configParam of featureConfig.expose.inline) {
+				const storedValue = dataStore[featureName].params[configParam.name];
 
 				feature.params.push({
 					name: configParam.name,
 					type: configParam.type,
-					value: localParam ? localParam : configParam.default,
+					value: storedValue ? storedValue : configParam.default,
 					description: configParam.description,
 				});
 			}
@@ -128,14 +125,14 @@ class FeatureManager {
 		});
 	}
 
-	updateFeature(feature: Feature) {
+	async updateFeature(feature: Feature) {
 		// If running, kill process
 		const process = this.processes.get(feature.name);
 		process?.kill("SIGTERM");
 		this.processes.delete(feature.name);
 
 		// Store changes to disk
-		this.config.features.update(feature);
+		await dataStore.updateFeature(feature);
 
 		// Update in-memory feature list
 		const localFeature = this.features[this.features.findIndex((f) => f.name === feature.name)];
@@ -151,4 +148,4 @@ class FeatureManager {
 	}
 }
 
-export default new FeatureManager();
+export const featureManager = new FeatureManager();

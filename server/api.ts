@@ -1,5 +1,5 @@
 import { send, Application, Router, Status } from "https://deno.land/x/oak@v17.1.3/mod.ts";
-import { listFeatures, updateFeature } from "local/server/features.ts";
+import { featureManager } from "local/server/features.ts";
 
 class API {
 	app: Application;
@@ -14,7 +14,7 @@ class API {
 		const router = new Router();
 
 		router.get("/features", async (ctx) => {
-			ctx.response.body = await listFeatures();
+			ctx.response.body = featureManager.features;
 		});
 
 		router.post("/features", async (ctx) => {
@@ -22,7 +22,7 @@ class API {
 			const body = await ctx.request.body.json();
 
 			try {
-				await updateFeature(body);
+				await featureManager.updateFeature(body);
 				ctx.response.body = { success: true };
 			} catch (err) {
 				ctx.response.status = Status.ExpectationFailed;
