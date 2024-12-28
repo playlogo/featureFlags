@@ -1,5 +1,3 @@
-import "jsr:@std/dotenv/load";
-
 export function buildWebSocket(prefix: string) {
 	// Get Server address
 	if (!Deno.env.has("FEATURE_SERVER_WEBSOCKET_URI")) {

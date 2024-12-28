@@ -12,6 +12,10 @@
                 "type": "string",
                 "description": "Path to the executable"
             }
+        },
+        "port": {
+            "type": "number",
+            "description": "Port for API, default to 80"
         }
     },
     "required": [

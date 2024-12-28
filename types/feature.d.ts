@@ -32,4 +32,5 @@ export interface Feature {
 	}[];
 	executable: string;
 	args: string[];
+	websocket: boolean;
 }

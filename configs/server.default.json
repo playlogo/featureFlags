@@ -2,5 +2,6 @@
     "$schema": "./server.schema.json",
     "executables": {
         "deno": "/home/pi/.deno/bin/deno"
-    }
+    },
+    "port": 80
 }

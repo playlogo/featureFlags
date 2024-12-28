@@ -1,13 +1,12 @@
 import { send, Application, Router, Status } from "https://deno.land/x/oak@v17.1.3/mod.ts";
 import { featureManager } from "local/server/features.ts";
+import { configManager } from "local/server/config.ts";
 
 class API {
 	app: Application;
-	port: number;
 
-	constructor(port = 80) {
+	constructor() {
 		this.app = new Application();
-		this.port = port;
 	}
 
 	async buildRouter() {
@@ -56,7 +55,7 @@ class API {
 			console.log(`Listening on: ${secure ? "https://" : "http://"}${hostname ?? "localhost"}:${port}`);
 		});
 
-		await this.app.listen({ port: this.port });
+		await this.app.listen({ port: configManager.port });
 	}
 }
 

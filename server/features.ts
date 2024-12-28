@@ -26,7 +26,7 @@ class FeatureManager {
 		// Build feature config validator
 		const ajv = new Ajv({ allErrors: true });
 		const featureSchema = JSON.parse(await Deno.readTextFile("features/utils/feature.schema.json"));
-		const validate = await ajv.compileAsync(featureSchema);
+		const validate = await ajv.compile(featureSchema);
 
 		// Load features
 		for await (const entry of Deno.readDir("./features")) {
@@ -64,9 +64,23 @@ class FeatureManager {
 				name: featureName,
 				enabled: dataStore[featureName].enabled,
 				params: [],
-				args: [],
+				args: featureConfig.args,
+				websocket: featureConfig.websocket,
 				executable: configManager.executables[featureConfig.executable] ?? featureConfig.executable,
 			};
+
+			// Add env permission for deno if needed
+			if (featureConfig.executable !== "deno") {
+				console.warn("[features] Advanced features only supported for deno features");
+			}
+
+			if (
+				featureConfig.websocket &&
+				featureConfig.executable === "deno" &&
+				!featureConfig.args.includes("--allow-env")
+			) {
+				feature.args = [feature.args[0], "--allow-env", ...feature.args.slice(1)];
+			}
 
 			for (const configParam of featureConfig.expose.inline) {
 				const storedValue = dataStore[featureName].params[configParam.name];
@@ -105,10 +119,18 @@ class FeatureManager {
 			}
 		}
 
+		// Build env
+		const env: any = {};
+
+		if (feature.websocket) {
+			env["FEATURE_SERVER_WEBSOCKET_URI"] = "";
+		}
+
 		// Create process
 		const command = new Deno.Command(feature.executable, {
 			args: [...feature.args, ...params],
 			cwd: "./features/" + feature.name,
+			env: env,
 		});
 
 		const child = command.spawn();

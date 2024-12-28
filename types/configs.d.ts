@@ -14,4 +14,5 @@ export interface ServerConfig {
 	executables: {
 		[key: string]: string;
 	};
+	port: number;
 }

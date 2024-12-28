@@ -58,7 +58,11 @@ class DataStoreManager {
 			}
 		} catch (err) {
 			console.error("[dataStore] Error loading dataStore file");
-			console.error(err);
+			console.error("[dataStore] Falling back to empty file");
+
+			if (!(err instanceof Deno.errors.NotFound)) {
+				console.error(err);
+			}
 		}
 	}
 
@@ -74,7 +78,7 @@ class DataStoreManager {
 		}
 
 		// Save to file
-		await Deno.writeTextFile("configs/dataStore.json", JSON.stringify(this.features), {
+		await Deno.writeTextFile("configs/dataStore.json", JSON.stringify(this.features, null, 4), {
 			append: false,
 			create: true,
 		});
