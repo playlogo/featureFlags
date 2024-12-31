@@ -7,6 +7,7 @@ Made with alpine.js and deno.
 Available features:
 
 - "Shairport": Restrict access to a shairport instance using mac filters
+- "Volume": Control the speaker volume remotely
 
 ## Development
 
