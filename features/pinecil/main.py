@@ -29,7 +29,7 @@ def mqttPublish(client: mqtt_client, message: dict):
     if not client.is_connected():
         return
 
-    result = client.publish(TOPIC, msg)
+    result = client.publish(TOPIC, msg, qos=0, retain=True)
 
     if result[0] == 0:
         print(f"[mqtt] Published `{msg}` to topic `{TOPIC}`")
