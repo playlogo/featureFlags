@@ -1,0 +1,13 @@
+{
+    "$schema": "../utils/feature.schema.json",
+    "type": "process",
+    "executable": "python",
+    "websocket": false,
+    "args": [
+        "installer.py"
+    ],
+    "expose": {
+        "inline": []
+    },
+    "report": []
+}
