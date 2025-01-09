@@ -6,6 +6,7 @@ class DataStoreManager {
 
 	features: DataStoreData = {
 		version: this.version,
+
 		features: {},
 	};
 

@@ -5,6 +5,7 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
 		<title>Feature Flags</title>
+		<link rel="icon" type="image/x-icon" href="/icon.png" />
 
 		<script defer src="alpine.js"></script>
 		<style>
@@ -15,9 +16,9 @@
 	</head>
 
 	<body>
-		<h2>Feature Flags - Overview</h2>
-
 		<main x-data x-init="init">
+			<h2>Feature Flags - <span x-text="$store.features.hostname"></span></h2>
+
 			<template x-for="item in $store.features.features" :key="index">
 				<div>
 					<hr />
@@ -105,24 +106,45 @@
 		function init() {
 			Alpine.store("features", {
 				features: [],
+				hostname: "",
 
-				update(newState) {
+				updateFeatures(newState) {
 					this.features = newState;
 				},
+
+				updateHostname(newHostname) {
+					this.hostname = newHostname;
+				},
 			});
+
+			setTimeout(() => {
+				loadFeatures();
+			}, 200);
 		}
 
 		// Load features
 		async function loadFeatures() {
-			const response = await fetch(host + "/features");
-			const data = await response.json();
-			Alpine.store("features").update(data);
+			// Load features
+			let features;
+			{
+				const response = await fetch(host + "/features");
+				features = await response.json();
+			}
+
+			// Load hostname
+			let hostname;
+			{
+				const response = await fetch(host + "/hostname");
+				hostname = await response.text();
+			}
+
+			Alpine.store("features").updateHostname(hostname);
+			Alpine.store("features").updateFeatures(features);
 		}
 
 		// Save features
 		async function saveFeature(featureDict) {
 			const content = JSON.parse(JSON.stringify(featureDict));
-			console.log(content);
 
 			const response = await fetch(host + "/features", {
 				method: "POST",
@@ -139,7 +161,5 @@
 				loadFeatures();
 			}
 		}
-
-		document.onload = loadFeatures();
 	</script>
 </html>

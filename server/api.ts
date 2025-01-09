@@ -1,6 +1,11 @@
+import * as ImageScript from "https://deno.land/x/imagescript@1.3.0/mod.ts";
+
 import { send, Application, Router, Status } from "https://deno.land/x/oak@v17.1.3/mod.ts";
+
 import { featureManager } from "local/server/features.ts";
 import { configManager } from "local/server/config.ts";
+
+import { exists, randomHSLColor, hslToHex } from "./utils.ts";
 
 class API {
 	app: Application;
@@ -30,10 +35,28 @@ class API {
 			}
 		});
 
+		// Hostname api
+		router.get("/hostname", (ctx) => {
+			ctx.response.body = Deno.hostname();
+			ctx.response.status = Status.OK;
+		});
+
 		return router;
 	}
 
 	async start() {
+		// Create colored icon if not already exits
+		if (!(await exists("server/static/icon.png"))) {
+			console.log("[api] Creating colored icon");
+
+			const color = hslToHex(randomHSLColor());
+			const svg = (await Deno.readTextFile("server/static/icon.svg")).replaceAll("#0fff2b", color);
+
+			const image = await ImageScript.Image.renderSVG(svg, 200).encode();
+			await Deno.writeFile("server/static/icon.png", image);
+			console.log(`[api] Created icon with color: ${color}`);
+		}
+
 		// Static serving
 		this.app.use(async (ctx, next) => {
 			try {

@@ -1,7 +1,7 @@
 {
     "tasks": {
-        "dev": "deno run --watch --allow-read --allow-write --allow-run --allow-net server/main.ts",
-        "run": "deno run --allow-read --allow-write --allow-run --allow-net server/main.ts",
+        "dev": "deno run --watch --allow-sys --allow-read --allow-write --allow-run --allow-net server/main.ts",
+        "run": "deno run --allow-sys --allow-read --allow-write --allow-run --allow-net server/main.ts",
         "lint": "deno lint --ignore=server/static",
         "check": "deno check server/main.ts ./**/*.ts --allow-import"
     },
