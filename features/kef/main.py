@@ -1,14 +1,35 @@
 import subprocess
 import time
 import requests
-import paho.mqtt.client as mqtt
+import datetime
+import paho.mqtt.subscribe as subscribe
 
 
 def turnOnSpeaker():
     res = requests.get(f"http://192.168.178.29:4002/api/ifttt/feedback/speaker")
 
+    if res.ok:
+        print("Successfully turned on speakers")
+    else:
+        print("Failed to turn on speakers")
 
-def monitor_audio():
+
+def handlePlaybackStart():
+    # Get speaker power level
+    esp8266_mqtt_last_heartbeat = subscribe.simple(
+        "kef/powered", hostname="192.168.178.29"
+    )
+    esp8266_last_heartbeat = int(esp8266_mqtt_last_heartbeat.payload)
+
+    if (
+        datetime.datetime.now()
+        - datetime.datetime.fromtimestamp(esp8266_last_heartbeat)
+    ).seconds > 60:
+        # Speakers are off, turn them on
+        turnOnSpeaker()
+
+
+def main():
     is_active = False
     last_change = 0
     debounce_secs = 0.5
@@ -32,17 +53,12 @@ def monitor_audio():
                 last_state = "running" if 'state: "running"' in line else "suspended"
             elif "node.name" in line and target_device in line:
                 if last_state == "running" and not is_active:
-                    print("started")
+                    handlePlaybackStart()
                     is_active = True
                     last_change = now
                 elif last_state == "suspended" and is_active:
-                    print("ended")
                     is_active = False
                     last_change = now
 
     except KeyboardInterrupt:
         pw_mon.terminate()
-
-
-if __name__ == "__main__":
-    monitor_audio()
