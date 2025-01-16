@@ -9,9 +9,11 @@ def turnOnSpeaker():
     res = requests.get(f"http://192.168.178.29:4002/api/ifttt/feedback/speaker")
 
     if res.ok:
-        print("Successfully turned on speakers")
+        print("[kef] Successfully turned on speakers")
     else:
-        print("Failed to turn on speakers")
+        print("[kef] Failed to turn on speakers")
+        print(res.status_code)
+        print(res.text)
 
 
 def handlePlaybackStart():
