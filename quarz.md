@@ -9,9 +9,13 @@ Available features:
 - "Pinecil": Broadcast the state of your Pinecil via MQTT
 - "Kef": Turn on your speakers automatically when audio playback starts
 
-> Webinterface running on port 80 by default
+Webinterface:
 
 ![Screenshot of webinterface](docs/screenshot.png)
+
+Log output:
+
+![Log output](docs/output.png)
 
 ## Setup
 
